@@ -27,6 +27,27 @@ public class FirstPersonController : MonoBehaviour
     [Tooltip("눈 위치. 비워두면 자식에서 카메라를 찾아 쓴다")]
     public Transform cameraPivot;
 
+    /// <summary>
+    /// ★★ <b>걷는 몸.</b> 카메라가 가까워지면 숨긴다. (2026-10-19)
+    ///
+    /// 제작자: *"중간중간 플레이어 몸이 버그 난 것처럼 끊긴다."*
+    /// <b>버그가 아니라 3인칭 카메라다.</b> <see cref="viewDistance"/> 가 3.1m 인데
+    /// 벽이 뒤에 있으면 <see cref="PlaceCamera"/> 가 카메라를 몸 쪽으로 당긴다
+    /// (안 그러면 카메라가 벽을 뚫는다). 그러다 0.45m 까지 붙으면
+    /// <b>캡슐이 카메라 근평면에 잘려서</b> 반쯤 사라졌다 나타났다 한다 —
+    /// 좁은 실내와 문간에서 특히 그렇다.
+    ///
+    /// 고치는 법은 간단하다. <b>너무 가까워지면 몸을 아예 안 그린다</b> —
+    /// 반쯤 잘린 몸보다 깔끔한 1인칭이 낫다. 돌려 쓰는 게임은 전부 이렇게 한다.
+    /// 비어 있으면 이름으로 한 번 찾는다(<see cref="BearNpc"/> 와 같은 예외).
+    /// </summary>
+    public Transform body;
+
+    /// <summary>이 거리보다 가까우면 몸을 숨긴다. 캡슐 반지름 0.3 + 근평면 여유.</summary>
+    public float hideBodyWithin = 1.35f;
+
+    bool bodyLooked;
+
     [Header("3인칭 — 고른 캐릭터 캡슐이 보이게")]
     [Tooltip("몸에서 카메라까지. 0 이면 1인칭으로 돌아간다")]
     public float viewDistance = 3.1f;
@@ -177,6 +198,19 @@ public class FirstPersonController : MonoBehaviour
         }
 
         cameraPivot.localPosition = pivot + back * d;
+
+        // ★ 카메라가 몸에 붙으면 캡슐이 잘려 보인다 — 그럴 땐 아예 안 그린다.
+        if (body == null && !bodyLooked)
+        {
+            bodyLooked = true;
+            body = transform.Find("Body");
+        }
+        if (body != null)
+        {
+            bool show = d > hideBodyWithin;
+            foreach (var r in body.GetComponentsInChildren<Renderer>(true))
+                if (r.enabled != show) r.enabled = show;
+        }
     }
 
     void HandleMove()
