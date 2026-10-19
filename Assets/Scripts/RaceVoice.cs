@@ -71,7 +71,7 @@ public static class RaceVoice
     /// <summary>
     /// 임무 한 줄 설명. <b>왜 이걸 하는지</b>를 이야기로 붙인다 — 조건만 적으면
     /// "발판 다 밟기" 처럼 게임 조작 설명이 되고, 박물관과 아무 상관이 없어진다.
-    /// (2026-09-17 유저 · 검토 의견 피드백. 임시 문구라 <see cref="StoryScript"/> 쪽과 같이 다듬을 것)
+    /// (2026-09-17 검토 의견 반영. 임시 문구라 <see cref="StoryScript"/> 쪽과 같이 다듬을 것)
     /// </summary>
     public static string Why(MissionManager.Goal goal) => goal switch
     {
