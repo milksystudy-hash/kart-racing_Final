@@ -57,14 +57,27 @@ public class TitleScreen : MonoBehaviour
     /// </summary>
     string[] items;
 
-    static bool HasProgress =>
-        CollectionState.Count > 0 || StoryProgress.CurrentChapter > 0 || GrandFinal.Cleared
-        // ★ 2026-10-16 — <b>본 이야기도 진행이다.</b> 제작자: *"처음부터 하고 창 닫고
-        //   다시 켜면 프롤로그가 안 뜨는데 정상 맞지?"* 동작은 맞다(한 번 본 건 안 튼다).
-        //   그런데 그 상태에서 칸이 「게임 시작」이면, 눌러도 아무 일이 안 나는 데다
-        //   「처음부터」가 없어서 <b>프롤로그를 두 번 다시 못 본다.</b>
-        //   프롤로그만 보고 껐어도 「이어하기 / 처음부터」가 맞는다.
-        || StoryProgress.AnySeen;
+    /// <summary>
+    /// <b>달린 적이 있나.</b> 이게 참일 때만 첫 칸이 「이어하기」다 —
+    /// 눌렀을 때 <b>실제로 이어지는 게 있어야</b> 그 말이 맞는다.
+    /// </summary>
+    static bool HasRun =>
+        CollectionState.Count > 0 || StoryProgress.CurrentChapter > 0 || GrandFinal.Cleared;
+
+    /// <summary>
+    /// <b>지울 것이 있나.</b> 이게 참이면 「처음부터」 칸이 생긴다.
+    ///
+    /// ★ 2026-10-16 — <b>본 이야기도 지울 것이다.</b> 제작자: *"처음부터 하고 창 닫고
+    ///   다시 켜면 프롤로그가 안 뜨는데 정상 맞지?"* 동작은 맞다(한 번 본 건 안 튼다).
+    ///   그런데 그 상태에서 「처음부터」가 없으면 <b>프롤로그를 두 번 다시 못 본다.</b>
+    ///
+    /// ★★ 2026-10-19 — 제작자: *"게임 키자마자 이어하기가 나와."* <b>맞는 지적이다.</b>
+    ///   프롤로그만 보고 껐으면 수집품도 0, 장도 0 이라 <b>눌러도 1판부터</b>인데
+    ///   칸에는 「이어하기」가 떠 있었다. 이어지는 게 없는데 이어하기라고 하면,
+    ///   플레이어는 <b>자기가 뭘 하다 말았는지</b>를 찾게 된다.
+    ///   그래서 <b>첫 칸 이름은 <see cref="HasRun"/>, 「처음부터」 유무는 여기</b>로 갈랐다.
+    /// </summary>
+    static bool HasProgress => HasRun || StoryProgress.AnySeen;
 
     /// <summary>칸 수. <see cref="PlaqueRect"/> 가 static 이라 따로 들고 있는다.</summary>
     static int shownItems = 4;
@@ -76,7 +89,7 @@ public class TitleScreen : MonoBehaviour
             if (items == null)
             {
                 items = HasProgress
-                    ? new[] { "이어하기", "처음부터", "환경설정", "나가기" }
+                    ? new[] { HasRun ? "이어하기" : "게임 시작", "처음부터", "환경설정", "나가기" }
                     : new[] { "게임 시작", "환경설정", "나가기" };
                 shownItems = items.Length;
             }
